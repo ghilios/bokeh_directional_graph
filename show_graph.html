@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Bokeh Plot</title>
+        
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.7.min.css" type="text/css" />
+        
+<script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.7.min.js"></script>
+<script type="text/javascript">
+    Bokeh.set_log_level("info");
+</script>
+        <style>
+          html {
+            width: 100%;
+            height: 100%;
+          }
+          body {
+            width: 90%;
+            height: 100%;
+            margin: auto;
+          }
+        </style>
+    </head>
+    <body>
+        
+        <div class="bk-root">
+            <div class="bk-plotdiv" id="026344e6-ae29-430a-8a14-b1fc982852f2"></div>
+        </div>
+        
+        <script type="text/javascript">
+            (function(root, factory) {
+        //  if(typeof exports === 'object' && typeof module === 'object')
+        //    factory(require("Bokeh"));
+        //  else if(typeof define === 'function' && define.amd)
+        //    define(["Bokeh"], factory);
+        //  else if(typeof exports === 'object')
+        //    factory(require("Bokeh"));
+        //  else
+            factory(root["Bokeh"]);
+        })(this, function(Bokeh) {
+          var define;
+          return (function outer(modules, entry) {
+          if (Bokeh != null) {
+            return Bokeh.register_plugin(modules, {}, entry);
+          } else {
+            throw new Error("Cannot find Bokeh. You have to load it prior to loading plugins.");
+          }
+        })
+        ({
+          "custom/main": function(require, module, exports) {
+            var models = {
+              "DirectedGraphRenderer": require("custom/directed_graph_renderer.directed_graph_renderer").DirectedGraphRenderer,
+        "NodesAndEdgesAndLinked": require("custom/directed_graph_renderer.nodes_and_edges_and_linked").NodesAndEdgesAndLinked,
+        "DynamicHoverTool": require("custom/dynamic_hover_tool.dynamic_hover_tool").DynamicHoverTool
+            };
+            require("base").register_models(models);
+            module.exports = models;
+          },
+          "custom/directed_graph_renderer.directed_graph_renderer": function(require, module, exports) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", { value: true });
+        var extend = function (child, parent) { for (var key in parent) {
+            if (hasProp.call(parent, key))
+                child[key] = parent[key];
+        } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; }, hasProp = {}.hasOwnProperty;
+        var graph_renderer_1 = require("models/renderers/graph_renderer");
+        exports.DirectedGraphRendererView = (function (superClass) {
+            extend(DirectedGraphRendererView, superClass);
+            function DirectedGraphRendererView() {
+                return DirectedGraphRendererView.__super__.constructor.apply(this, arguments);
+            }
+            return DirectedGraphRendererView;
+        })(graph_renderer_1.GraphRendererView);
+        exports.DirectedGraphRenderer = (function (superClass) {
+            extend(DirectedGraphRenderer, superClass);
+            function DirectedGraphRenderer() {
+                return DirectedGraphRenderer.__super__.constructor.apply(this, arguments);
+            }
+            DirectedGraphRenderer.prototype.default_view = exports.DirectedGraphRendererView;
+            DirectedGraphRenderer.prototype.type = 'DirectedGraphRenderer';
+            return DirectedGraphRenderer;
+        })(graph_renderer_1.GraphRenderer);
+        
+        },
+        "custom/directed_graph_renderer.nodes_and_edges_and_linked": function(require, module, exports) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", { value: true });
+        var extend = function (child, parent) { for (var key in parent) {
+            if (hasProp.call(parent, key))
+                child[key] = parent[key];
+        } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; }, hasProp = {}.hasOwnProperty;
+        var graph_hit_test_policy_1 = require("models/graphs/graph_hit_test_policy");
+        var array_1 = require("core/util/array");
+        var hittest_1 = require("core/hittest");
+        exports.NodesAndEdgesAndLinked = (function (superClass) {
+            extend(NodesAndEdgesAndLinked, superClass);
+            function NodesAndEdgesAndLinked() {
+                return NodesAndEdgesAndLinked.__super__.constructor.apply(this, arguments);
+            }
+            NodesAndEdgesAndLinked.prototype.type = 'NodesAndEdgesAndLinked';
+            NodesAndEdgesAndLinked.prototype._do = function (geometry, graph_view, final, append) {
+                var all_edge_indices, all_node_indices, edge_hit_test_result, edge_indices, edge_source, edge_view, hit, i, j, k, l, len, len1, node_hit_test_result, node_indices, node_view, nodes, ref, ref1, ref2;
+                ref = [graph_view.node_view, graph_view.edge_view], node_view = ref[0], edge_view = ref[1];
+                node_hit_test_result = node_view.glyph.hit_test(geometry);
+                edge_hit_test_result = edge_view.glyph.hit_test(geometry);
+                if (node_hit_test_result === null && edge_hit_test_result === null) {
+                    return false;
+                }
+                hit = 0;
+                all_edge_indices = [];
+                all_node_indices = [];
+                if (node_hit_test_result !== null) {
+                    node_indices = (function () {
+                        var j, len, ref1, results;
+                        ref1 = node_hit_test_result["1d"].indices;
+                        results = [];
+                        for (j = 0, len = ref1.length; j < len; j++) {
+                            i = ref1[j];
+                            results.push(node_view.model.data_source.data.index[i]);
+                        }
+                        return results;
+                    })();
+                    if (node_indices.length) {
+                        hit = 1;
+                    }
+                    edge_source = edge_view.model.data_source;
+                    for (i = j = 0, ref1 = edge_source.data.start.length; 0 <= ref1 ? j < ref1 : j > ref1; i = 0 <= ref1 ? ++j : --j) {
+                        if (array_1.contains(node_indices, edge_source.data.start[i]) || array_1.contains(node_indices, edge_source.data.end[i])) {
+                            all_edge_indices.push(i);
+                        }
+                    }
+                    Array.prototype.push.apply(all_node_indices, node_indices);
+                }
+                if (edge_hit_test_result !== null) {
+                    edge_indices = (function () {
+                        var k, len, ref2, results;
+                        ref2 = Object.keys(edge_hit_test_result['2d'].indices);
+                        results = [];
+                        for (k = 0, len = ref2.length; k < len; k++) {
+                            i = ref2[k];
+                            results.push(parseInt(i));
+                        }
+                        return results;
+                    })();
+                    if (edge_indices.length && hit === 0) {
+                        hit = 2;
+                    }
+                    nodes = [];
+                    for (k = 0, len = edge_indices.length; k < len; k++) {
+                        i = edge_indices[k];
+                        nodes.push(edge_view.model.data_source.data.start[i]);
+                        nodes.push(edge_view.model.data_source.data.end[i]);
+                        Array.prototype.push.apply(all_node_indices, (function () {
+                            var l, len1, ref2, results;
+                            ref2 = array_1.uniq(nodes);
+                            results = [];
+                            for (l = 0, len1 = ref2.length; l < len1; l++) {
+                                i = ref2[l];
+                                results.push(node_view.model.data_source.data.index.indexOf(i));
+                            }
+                            return results;
+                        })());
+                    }
+                    Array.prototype.push.apply(all_edge_indices, edge_indices);
+                }
+                node_hit_test_result = hittest_1.create_hit_test_result();
+                node_hit_test_result["1d"].indices = array_1.uniq(all_node_indices);
+                this._node_selector.update(node_hit_test_result, final, append);
+                edge_hit_test_result = hittest_1.create_hit_test_result();
+                edge_hit_test_result["1d"].indices = array_1.uniq(all_edge_indices);
+                ref2 = array_1.uniq(all_edge_indices);
+                for (l = 0, len1 = ref2.length; l < len1; l++) {
+                    i = ref2[l];
+                    edge_hit_test_result["2d"].indices[i] = [0];
+                }
+                this._edge_selector.update(edge_hit_test_result, final, append);
+                return hit;
+            };
+            NodesAndEdgesAndLinked.prototype.do_selection = function (geometry, graph_view, final, append) {
+                var did_hit;
+                this._node_selector = graph_view.node_view.model.data_source.selection_manager.selector;
+                this._edge_selector = graph_view.edge_view.model.data_source.selection_manager.selector;
+                did_hit = this._do(geometry, graph_view, final, append);
+                graph_view.node_view.model.data_source.selected = this._node_selector.indices;
+                graph_view.edge_view.model.data_source.selected = this._edge_selector.indices;
+                graph_view.node_view.model.data_source.select.emit();
+                return did_hit !== 0;
+            };
+            NodesAndEdgesAndLinked.prototype.do_inspection = function (geometry, graph_view, final, append) {
+                var did_hit;
+                this._node_selector = graph_view.node_view.model.data_source.selection_manager.get_or_create_inspector(graph_view.node_view.model);
+                this._edge_selector = graph_view.edge_view.model.data_source.selection_manager.get_or_create_inspector(graph_view.edge_view.model);
+                did_hit = this._do(geometry, graph_view, final, append);
+                graph_view.node_view.model.data_source.setv({
+                    inspected: this._node_selector.indices
+                }, {
+                    silent: true
+                });
+                graph_view.edge_view.model.data_source.setv({
+                    inspected: this._edge_selector.indices
+                }, {
+                    silent: true
+                });
+                if (did_hit === 1) {
+                    graph_view.node_view.model.data_source.inspect.emit([
+                        graph_view.node_view, {
+                            geometry: geometry
+                        }
+                    ]);
+                }
+                if (did_hit === 2) {
+                    graph_view.edge_view.model.data_source.inspect.emit([
+                        graph_view.edge_view, {
+                            geometry: geometry
+                        }
+                    ]);
+                }
+                return did_hit !== 0;
+            };
+            return NodesAndEdgesAndLinked;
+        })(graph_hit_test_policy_1.GraphHitTestPolicy);
+        
+        },
+        "custom/dynamic_hover_tool.dynamic_hover_tool": function(require, module, exports) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", { value: true });
+        var extend = function (child, parent) { for (var key in parent) {
+            if (hasProp.call(parent, key))
+                child[key] = parent[key];
+        } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; }, hasProp = {}.hasOwnProperty;
+        var hover_tool_1 = require("models/tools/inspectors/hover_tool");
+        var p = require("core/properties");
+        exports.DynamicHoverToolView = (function (superClass) {
+            extend(DynamicHoverToolView, superClass);
+            function DynamicHoverToolView() {
+                return DynamicHoverToolView.__super__.constructor.apply(this, arguments);
+            }
+            DynamicHoverToolView.prototype._render_tooltips = function (ds, i, vars) {
+                var cell, colname, color, column, dynamic_tooltips, el, hex, j, label, len, match, opts, ref, ref1, row, rows, swatch, tooltips, value;
+                dynamic_tooltips = this.model.dynamic_tooltips;
+                if (dynamic_tooltips == null) {
+                    return DynamicHoverToolView.__super__._render_tooltips.call(this, ds, i, vars);
+                }
+                tooltips = isFunction(dynamic_tooltips) ? dynamic_tooltips(ds, i, vars) : dynamic_tooltips.execute(ds, i, vars);
+                if (isString(tooltips)) {
+                    el = div();
+                    el.innerHTML = replace_placeholders(tooltips, ds, i, this.model.formatters, vars);
+                    return el;
+                }
+                else if (isFunction(tooltips)) {
+                    return tooltips(ds, vars);
+                }
+                else {
+                    rows = div({
+                        style: {
+                            display: "table",
+                            borderSpacing: "2px"
+                        }
+                    });
+                    for (j = 0, len = tooltips.length; j < len; j++) {
+                        ref = tooltips[j], label = ref[0], value = ref[1];
+                        row = div({
+                            style: {
+                                display: "table-row"
+                            }
+                        });
+                        rows.appendChild(row);
+                        cell = div({
+                            style: {
+                                display: "table-cell"
+                            },
+                            "class": 'bk-tooltip-row-label'
+                        }, label + ": ");
+                        row.appendChild(cell);
+                        cell = div({
+                            style: {
+                                display: "table-cell"
+                            },
+                            "class": 'bk-tooltip-row-value'
+                        });
+                        row.appendChild(cell);
+                        if (value.indexOf("$color") >= 0) {
+                            ref1 = value.match(/\$color(\[.*\])?:(\w*)/), match = ref1[0], opts = ref1[1], colname = ref1[2];
+                            column = ds.get_column(colname);
+                            if (column == null) {
+                                el = span({}, colname + " unknown");
+                                cell.appendChild(el);
+                                continue;
+                            }
+                            hex = (opts != null ? opts.indexOf("hex") : void 0) >= 0;
+                            swatch = (opts != null ? opts.indexOf("swatch") : void 0) >= 0;
+                            color = column[i];
+                            if (color == null) {
+                                el = span({}, "(null)");
+                                cell.appendChild(el);
+                                continue;
+                            }
+                            if (hex) {
+                                color = _color_to_hex(color);
+                            }
+                            el = span({}, color);
+                            cell.appendChild(el);
+                            if (swatch) {
+                                el = span({
+                                    "class": 'bk-tooltip-color-block',
+                                    style: {
+                                        backgroundColor: color
+                                    }
+                                }, " ");
+                                cell.appendChild(el);
+                            }
+                        }
+                        else {
+                            value = value.replace("$~", "$data_");
+                            el = span();
+                            el.innerHTML = replace_placeholders(value, ds, i, this.model.formatters, vars);
+                            cell.appendChild(el);
+                        }
+                    }
+                    return rows;
+                }
+            };
+            return DynamicHoverToolView;
+        })(hover_tool_1.HoverToolView);
+        exports.DynamicHoverTool = (function (superClass) {
+            extend(DynamicHoverTool, superClass);
+            function DynamicHoverTool() {
+                return DynamicHoverTool.__super__.constructor.apply(this, arguments);
+            }
+            DynamicHoverTool.prototype.default_view = exports.DynamicHoverToolView;
+            DynamicHoverTool.prototype.type = "DynamicHoverTool";
+            DynamicHoverTool.prototype.tool_name = "DynamicHover";
+            DynamicHoverTool.prototype.icon = "bk-tool-icon-hover";
+            DynamicHoverTool.define({
+                dynamic_tooltips: [p.Any, {}]
+            });
+            return DynamicHoverTool;
+        })(hover_tool_1.HoverTool);
+        
+        }
+        }, "custom/main");
+        ;
+        });
+        (function() {
+          var fn = function() {
+            Bokeh.safely(function() {
+              var docs_json = {"64c80871-3b9b-4b18-aa21-6b699554b975":{"roots":{"references":[{"attributes":{},"id":"bf6ef2e4-58a2-4d06-8f2b-150e76b3e802","type":"LinearScale"},{"attributes":{"formatter":{"id":"a0a461b8-4783-4b4a-9e4d-d8d62c5cebdc","type":"BasicTickFormatter"},"plot":{"id":"95646f81-b405-4d6d-91a6-4293c4cbf950","subtype":"Figure","type":"Plot"},"ticker":{"id":"98a6063b-234a-4f1c-a4c4-a85804b1838e","type":"BasicTicker"}},"id":"525e028b-4f58-485e-955b-b3bcb461ef1e","type":"LinearAxis"},{"attributes":{"dimension":1,"plot":{"id":"95646f81-b405-4d6d-91a6-4293c4cbf950","subtype":"Figure","type":"Plot"},"ticker":{"id":"98a6063b-234a-4f1c-a4c4-a85804b1838e","type":"BasicTicker"}},"id":"87ee1cf2-4e7f-486a-8617-9742d6eac2e7","type":"Grid"},{"attributes":{},"id":"98a6063b-234a-4f1c-a4c4-a85804b1838e","type":"BasicTicker"},{"attributes":{"graph_layout":{"0":[-2.5319291624974607,0.8011801924609756],"1":[-2.672282132928344,-0.2792397796249846],"10":[-3.252644312511306,3.2363773379706355],"11":[-4.27547033296411,2.5983896101006057],"12":[-4.89889609638446,-1.0962517550797788],"13":[-1.4531892358883063,-1.2137156966309814],"14":[4.927826495267949,0.051406627850283826],"15":[4.258202781446656,1.6356605362074106],"16":[-0.1020926408585412,5.0],"17":[-5.0,0.22382710462846678],"18":[3.6194415254033636,2.3028113512329105],"19":[-0.5762681599290271,1.1054213803310633],"2":[-0.7196439144909395,-2.1665776690104845],"20":[4.261141452673826,-2.5862103610859872],"21":[-4.81717107573906,1.314227052517328],"22":[4.635677945200424,-1.7050081922142053],"23":[3.1362703844666164,-3.2628842528695396],"24":[-0.8554066626924319,-4.9910161577291685],"25":[0.6366993480963226,-5.0],"26":[4.799044919158069,0.9349131963460149],"27":[1.0523220937212043,-4.250838765268638],"28":[1.5397407594362198,-3.3918249499277042],"29":[4.675543144093954,-0.9326051296175484],"3":[-3.3688559407653167,-1.674418292419598],"30":[0.9564785575391079,0.8510050230008046],"31":[0.2988406339763481,-2.523586486940386],"32":[2.8729757319662577,-0.5927775924249703],"33":[2.386531184916757,-1.0762233404947992],"4":[-2.2827332641972475,3.6347348868931046],"5":[-2.371957879464601,4.261554792346207],"6":[-1.4259178121595868,4.632485611447484],"7":[-3.8744272481925,-2.251573896064858],"8":[0.42747607491617146,-0.273695110180185],"9":[2.277930648754163,-4.420043559623189]}},"id":"f7105c9b-87be-44c8-b2fc-b64a3d327d8b","type":"StaticLayoutProvider"},{"attributes":{"edge_renderer":{"id":"86e63427-bd4b-4948-8f58-c5b85f32d7fb","type":"GlyphRenderer"},"inspection_policy":{"id":"adc21c1d-0a19-4ed7-b818-8a8050411c5c","type":"NodesAndEdgesAndLinked"},"layout_provider":{"id":"f7105c9b-87be-44c8-b2fc-b64a3d327d8b","type":"StaticLayoutProvider"},"node_renderer":{"id":"410fb67c-0024-47c8-80ff-cb0b6719f235","type":"GlyphRenderer"},"selection_policy":{"id":"43daf6c7-c2ae-4c7b-b183-4089f337ba2c","type":"NodesOnly"}},"id":"a65c95a3-c056-4469-acf8-2f9d45786f32","type":"DirectedGraphRenderer"},{"attributes":{"line_alpha":{"value":0.8},"line_color":{"value":"#cccccc"},"line_width":{"value":2}},"id":"205c3175-1203-41e5-904b-ed6d06c6dfcf","type":"MultiLine"},{"attributes":{},"id":"43daf6c7-c2ae-4c7b-b183-4089f337ba2c","type":"NodesOnly"},{"attributes":{"callback":null,"end":1.1,"start":-1.1},"id":"5e64a8fc-3445-417b-bd27-7a28aa9aad20","type":"Range1d"},{"attributes":{"level":"glyph","plot":null,"source":{"id":"ccf0c85a-573f-4cb3-9fa3-47b4504d71bc","type":"ColumnDataSource"},"text":{"field":"_id"},"text_align":"center","text_baseline":"middle","x":{"field":"_xpos"},"y":{"field":"_ypos"}},"id":"486c7294-bc25-41b3-bbe0-deae0dd997b5","type":"LabelSet"},{"attributes":{"overlay":{"id":"ca06a100-d69e-4009-b473-33057682bf10","type":"BoxAnnotation"}},"id":"452a6495-bd7e-4fad-afb4-e9198ed99f9c","type":"BoxZoomTool"},{"attributes":{"data_source":{"id":"ccf0c85a-573f-4cb3-9fa3-47b4504d71bc","type":"ColumnDataSource"},"glyph":{"id":"6e6f940f-82e5-4adb-bd73-665e07e60934","type":"Circle"},"hover_glyph":{"id":"747a46e3-9ac0-40ae-ae65-372e17092043","type":"Circle"},"muted_glyph":null,"view":{"id":"c5c7aa42-5da3-4666-9c3f-0f6205ac368c","type":"CDSView"}},"id":"410fb67c-0024-47c8-80ff-cb0b6719f235","type":"GlyphRenderer"},{"attributes":{},"id":"9cc6a101-594d-4868-a088-494fee93b92b","type":"PanTool"},{"attributes":{"fill_color":{"value":"#2b83ba"},"radius":{"units":"data","value":0.1}},"id":"6e6f940f-82e5-4adb-bd73-665e07e60934","type":"Circle"},{"attributes":{"callback":null,"dynamic_tooltips":null,"tooltips":[["index","$index"],["club","@_club"]]},"id":"9f5d9f82-bb9a-474a-a27b-afa8aa63cc9b","type":"DynamicHoverTool"},{"attributes":{"fill_color":{"value":"#abdda4"},"radius":{"units":"data","value":0.1}},"id":"747a46e3-9ac0-40ae-ae65-372e17092043","type":"Circle"},{"attributes":{"formatter":{"id":"f34dbb9b-c304-4374-a85c-dd26f48cf5a8","type":"BasicTickFormatter"},"plot":{"id":"95646f81-b405-4d6d-91a6-4293c4cbf950","subtype":"Figure","type":"Plot"},"ticker":{"id":"4b0fe5d2-4e63-40c4-b267-cac1ac02bfe3","type":"BasicTicker"}},"id":"fa9ffad4-0ff9-42f8-b0d2-0abc82283b06","type":"LinearAxis"},{"attributes":{},"id":"a0a461b8-4783-4b4a-9e4d-d8d62c5cebdc","type":"BasicTickFormatter"},{"attributes":{},"id":"86f92b60-ebf4-4e39-801b-654a8c3c8687","type":"ResetTool"},{"attributes":{"source":{"id":"ccf0c85a-573f-4cb3-9fa3-47b4504d71bc","type":"ColumnDataSource"}},"id":"c5c7aa42-5da3-4666-9c3f-0f6205ac368c","type":"CDSView"},{"attributes":{"bottom_units":"screen","fill_alpha":{"value":0.5},"fill_color":{"value":"lightgrey"},"left_units":"screen","level":"overlay","line_alpha":{"value":1.0},"line_color":{"value":"black"},"line_dash":[4,4],"line_width":{"value":2},"plot":null,"render_mode":"css","right_units":"screen","top_units":"screen"},"id":"ca06a100-d69e-4009-b473-33057682bf10","type":"BoxAnnotation"},{"attributes":{"callback":null,"end":1.1,"start":-1.1},"id":"eb8839eb-c845-4a02-b78c-424c4e6cc081","type":"Range1d"},{"attributes":{},"id":"c55d3e74-a528-4818-acd6-3fcf76f34ec0","type":"LinearScale"},{"attributes":{},"id":"adc21c1d-0a19-4ed7-b818-8a8050411c5c","type":"NodesAndEdgesAndLinked"},{"attributes":{"active_drag":"auto","active_inspect":"auto","active_scroll":{"id":"4b4829cd-615e-4fd1-9d9c-c1e6735664bb","type":"WheelZoomTool"},"active_tap":"auto","tools":[{"id":"9cc6a101-594d-4868-a088-494fee93b92b","type":"PanTool"},{"id":"4b4829cd-615e-4fd1-9d9c-c1e6735664bb","type":"WheelZoomTool"},{"id":"452a6495-bd7e-4fad-afb4-e9198ed99f9c","type":"BoxZoomTool"},{"id":"51d8ac51-58e7-41f7-bcb3-706d6490fa70","type":"SaveTool"},{"id":"86f92b60-ebf4-4e39-801b-654a8c3c8687","type":"ResetTool"},{"id":"b47c0ffa-7e18-4cc7-99c8-9fa623bf33bc","type":"HelpTool"},{"id":"9f5d9f82-bb9a-474a-a27b-afa8aa63cc9b","type":"DynamicHoverTool"}]},"id":"29fc0d6f-a4ff-4320-8502-f408e0998f4a","type":"Toolbar"},{"attributes":{"callback":null,"column_names":["index"],"data":{"_club":["Mr. Hi","Mr. Hi","Mr. Hi","Mr. Hi","Mr. Hi","Mr. Hi","Mr. Hi","Mr. Hi","Mr. Hi","Officer","Mr. Hi","Mr. Hi","Mr. Hi","Mr. Hi","Officer","Officer","Mr. Hi","Mr. Hi","Officer","Mr. Hi","Officer","Mr. Hi","Officer","Officer","Officer","Officer","Officer","Officer","Officer","Officer","Officer","Officer","Officer","Officer"],"_id":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],"_xpos":[-2.5319291624974607,-2.672282132928344,-0.7196439144909395,-3.3688559407653167,-2.2827332641972475,-2.371957879464601,-1.4259178121595868,-3.8744272481925,0.42747607491617146,2.277930648754163,-3.252644312511306,-4.27547033296411,-4.89889609638446,-1.4531892358883063,4.927826495267949,4.258202781446656,-0.1020926408585412,-5.0,3.6194415254033636,-0.5762681599290271,4.261141452673826,-4.81717107573906,4.635677945200424,3.1362703844666164,-0.8554066626924319,0.6366993480963226,4.799044919158069,1.0523220937212043,1.5397407594362198,4.675543144093954,0.9564785575391079,0.2988406339763481,2.8729757319662577,2.386531184916757],"_ypos":[0.8011801924609756,-0.2792397796249846,-2.1665776690104845,-1.674418292419598,3.6347348868931046,4.261554792346207,4.632485611447484,-2.251573896064858,-0.273695110180185,-4.420043559623189,3.2363773379706355,2.5983896101006057,-1.0962517550797788,-1.2137156966309814,0.051406627850283826,1.6356605362074106,5.0,0.22382710462846678,2.3028113512329105,1.1054213803310633,-2.5862103610859872,1.314227052517328,-1.7050081922142053,-3.2628842528695396,-4.9910161577291685,-5.0,0.9349131963460149,-4.250838765268638,-3.3918249499277042,-0.9326051296175484,0.8510050230008046,-2.523586486940386,-0.5927775924249703,-1.0762233404947992],"index":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]}},"id":"ccf0c85a-573f-4cb3-9fa3-47b4504d71bc","type":"ColumnDataSource"},{"attributes":{},"id":"4b0fe5d2-4e63-40c4-b267-cac1ac02bfe3","type":"BasicTicker"},{"attributes":{"below":[{"id":"fa9ffad4-0ff9-42f8-b0d2-0abc82283b06","type":"LinearAxis"}],"left":[{"id":"525e028b-4f58-485e-955b-b3bcb461ef1e","type":"LinearAxis"}],"plot_height":800,"plot_width":800,"renderers":[{"id":"fa9ffad4-0ff9-42f8-b0d2-0abc82283b06","type":"LinearAxis"},{"id":"d9e2ba73-04ba-40b4-be30-48a7d230fb3e","type":"Grid"},{"id":"525e028b-4f58-485e-955b-b3bcb461ef1e","type":"LinearAxis"},{"id":"87ee1cf2-4e7f-486a-8617-9742d6eac2e7","type":"Grid"},{"id":"ca06a100-d69e-4009-b473-33057682bf10","type":"BoxAnnotation"},{"id":"a65c95a3-c056-4469-acf8-2f9d45786f32","type":"DirectedGraphRenderer"},{"id":"486c7294-bc25-41b3-bbe0-deae0dd997b5","type":"LabelSet"},{"id":"57740dce-3336-48d6-8681-65ff29fce1b1","type":"LabelSet"}],"title":{"id":"825614bb-9b2e-440b-ac6d-0b56554ad26d","type":"Title"},"toolbar":{"id":"29fc0d6f-a4ff-4320-8502-f408e0998f4a","type":"Toolbar"},"x_range":{"id":"eb8839eb-c845-4a02-b78c-424c4e6cc081","type":"Range1d"},"x_scale":{"id":"bf6ef2e4-58a2-4d06-8f2b-150e76b3e802","type":"LinearScale"},"y_range":{"id":"5e64a8fc-3445-417b-bd27-7a28aa9aad20","type":"Range1d"},"y_scale":{"id":"c55d3e74-a528-4818-acd6-3fcf76f34ec0","type":"LinearScale"}},"id":"95646f81-b405-4d6d-91a6-4293c4cbf950","subtype":"Figure","type":"Plot"},{"attributes":{"plot":{"id":"95646f81-b405-4d6d-91a6-4293c4cbf950","subtype":"Figure","type":"Plot"},"ticker":{"id":"4b0fe5d2-4e63-40c4-b267-cac1ac02bfe3","type":"BasicTicker"}},"id":"d9e2ba73-04ba-40b4-be30-48a7d230fb3e","type":"Grid"},{"attributes":{},"id":"4b4829cd-615e-4fd1-9d9c-c1e6735664bb","type":"WheelZoomTool"},{"attributes":{},"id":"51d8ac51-58e7-41f7-bcb3-706d6490fa70","type":"SaveTool"},{"attributes":{},"id":"f34dbb9b-c304-4374-a85c-dd26f48cf5a8","type":"BasicTickFormatter"},{"attributes":{"source":{"id":"2f8434b7-8bb2-4f5d-8d0e-a29b022be6c4","type":"ColumnDataSource"}},"id":"f0978779-6709-4df8-bd6f-8328411054d1","type":"CDSView"},{"attributes":{"callback":null,"column_names":["end","start"],"data":{"_angle":[-1.6999788314363826,-1.0225768552833348,-1.896804240813855,1.4830773865575186,1.5245997481549964,1.2897593188802183,-1.985107312150711,-0.34839131575485377,1.8585404015757745,2.3410383428110433,-2.465858536057777,-1.079245013881138,-2.9117959823958643,0.15433238267026947,2.920749982381351,-0.8654789886126909,2.9287460201540827,-0.7683944025106079,-2.0338615047157527,2.502642389044893,0.5838022378135311,-2.118174616568329,-0.6539990412938971,0.3019449016291435,2.9579109036995126,0.41288437446723736,-3.11465715230515,1.0259639252666837,-0.6446285263485323,-0.8662064310838797,-0.49690646418245354,2.2268706775313687,-2.29017575008017,2.7803023261654483,0.23601017177600792,-2.751883001096701,0.8612460400532833,0.3145263398522523,-2.280525319762512,0.3736670072887686,0.2707961919383226,-0.1297444595983414,1.131148968199919,-0.38879813256640433,1.5383297560623863,0.03579261553471365,-2.8378021057881266,-2.723971326609511,-2.126956642180155,-2.1748971371390717,-1.8230970698383198,-1.9206569704171812,-0.634704967201526,2.1790815357490785,2.4635107756449766,2.5787043590228818,2.868986489874364,1.6690868597911495,-2.5342535157104615,-2.698896669224995,0.9870382446271943,1.901104684029418,-0.006020841447764859,0.3701092052283372,1.133244335424672,1.7063898339679175,-2.4466811031482694,-1.636831666033847,1.172935238437223,1.2202134591469882,2.531078530932079,2.9552554941529237,-3.078932343901768,-0.9324184514087235,-0.6456381580705804,0.6435527145978895,0.6062045694827655,-2.3592863753661932],"_betweenness":[14.17,43.64,11.5,29.33,43.83,43.83,12.8,41.65,29.33,33.0,26.1,23.77,22.51,25.77,22.51,71.39,10.49,13.03,4.33,10.49,8.21,4.16,6.96,18.11,12.58,38.7,14.15,5.15,17.28,23.11,12.78,4.28,1.89,6.9,8.37,1.67,2.67,16.5,2.67,1.67,16.5,17.08,5.5,22.68,16.61,38.05,13.51,19.49,13.51,19.49,13.51,19.49,33.31,13.51,19.49,13.51,19.49,12.53,11.09,5.91,3.73,18.33,2.37,10.47,22.5,23.59,30.46,2.54,17.1,13.78,8.33,13.09,16.72,15.04,9.57,23.24,29.95,4.61],"_id":["--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->","--friends_with-->"],"_xpos":[-2.6021056477129023,-1.6257865384942,-2.9503925516313885,-2.407331213347354,-2.4519435209810307,-1.9789234873285237,-3.2031782053449804,-1.0522265437906446,-2.8922867375043833,-3.4036997477307853,-3.7154126294409604,-1.9925591991928835,-3.7659645812487303,-1.554098661213244,-3.67455011911826,-1.1165442642605563,-3.836141066464172,-1.6959630237096417,-3.0205690368468305,-3.7447266043337017,-1.6242751464286855,-3.273354690560422,-2.062735684408325,-0.857901787694618,-2.044249927628128,1.076665908737659,-2.29703558134172,-0.146083919787384,0.7791433671316117,0.16633908961513244,0.4100484224726402,-1.0864165751896229,-3.621641594478908,-4.133876018574888,-2.4110225883268113,-2.7676887883542767,-1.8543255381784172,-1.237025260161571,-2.8123010959879533,-1.8989378458120938,-0.764005226509064,1.6502259034412146,0.6919773162276397,1.4070036299164643,2.33223091683546,0.46667097451422546,3.9004011136171033,3.657178840092353,3.5655892567064567,3.3223669831817064,3.2462086286848106,3.0029863551600604,0.905131512493865,3.5670585923200417,3.3238363187952915,3.754326838583341,3.5111045650585906,3.004623058216437,1.8864848662814695,2.0942962390939104,3.905906764280285,2.761400784691687,-0.10935365729805469,0.0984577155143862,-0.2782830143580419,0.4677699910363353,3.592788052037413,4.7372940316260115,1.7194266393189808,1.9631359721764885,0.9192906967062839,3.7742594380301058,3.5310371645053555,1.6715048712279326,1.9147271447526828,1.5859081829713029,1.3426859094465526,2.6297534584415074],"_ypos":[0.2609702064179955,-0.6826987382747545,-0.4366190499793112,2.21795753967704,2.531367492403591,2.7168329019542297,-0.7251968518019412,0.2637425411403953,2.0187787652158056,1.6997849012807906,-0.1475357813094016,-0.20626775208500292,0.5125036485447212,0.9533007863960195,1.0577036224891518,-0.8612031472397053,-0.027706337498258904,-1.2229087243177346,-0.9768290360222913,0.5174936364461717,0.41309080035303936,-1.2654068378449213,-0.746477738127983,0.28588262168791,-1.9204979807150413,-1.3796776307177274,-2.2090757825376715,-1.2201363895953348,-3.293310614316837,-3.208708217139561,-2.7792013094690944,-1.690146682820733,-1.962996094242228,-1.3853350237496884,-1.4440669945252897,3.43555611243187,4.133610249170294,4.630777396173103,3.748966065158421,4.447020201896845,4.816242805723742,-0.43323635130257765,0.2886549564103098,-0.6749592253374921,-2.7481334500589942,-1.1449695185628903,-0.27068548228734324,-0.5124083563222577,0.5214414718912201,0.2797185978563057,0.8550168794039701,0.6132940053690557,0.014599019918132061,-1.5894939767554788,-1.8312168507903932,-1.1488928923195878,-1.3906157663545022,-1.927830922647255,-4.13144212643477,-3.756861509069089,-2.097744691243544,-2.1695537966821696,-4.995508078864584,-4.620927461498903,-3.7573013223347775,-3.7617932434701933,-0.07065507207439214,0.0011540333642332534,-2.6635310528817184,-2.2340241452112517,-2.9577057184340454,-0.7626913610212593,-1.0044142350561738,-0.11260915874699728,0.12911371528791715,-1.5581820396826782,-1.7999049137175926,-0.8345004664598847],"end":[1,2,3,4,5,6,7,8,10,11,12,13,17,19,21,31,17,2,3,21,19,7,13,30,3,32,7,8,9,27,28,13,7,12,13,10,6,16,10,6,16,32,30,33,33,33,32,33,32,33,32,33,33,32,33,32,33,32,25,27,29,33,25,27,31,31,33,29,33,33,31,32,33,33,32,32,33,33],"start":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,4,4,5,5,5,6,8,8,8,9,13,14,14,15,15,18,18,19,20,20,22,22,23,23,23,23,23,24,24,24,25,26,26,27,28,28,29,29,30,30,31,31,32]}},"id":"2f8434b7-8bb2-4f5d-8d0e-a29b022be6c4","type":"ColumnDataSource"},{"attributes":{"data_source":{"id":"2f8434b7-8bb2-4f5d-8d0e-a29b022be6c4","type":"ColumnDataSource"},"glyph":{"id":"205c3175-1203-41e5-904b-ed6d06c6dfcf","type":"MultiLine"},"hover_glyph":{"id":"6aefbb7a-eda6-413f-9c81-3c9c1a6c1fb1","type":"MultiLine"},"muted_glyph":null,"view":{"id":"f0978779-6709-4df8-bd6f-8328411054d1","type":"CDSView"}},"id":"86e63427-bd4b-4948-8f58-c5b85f32d7fb","type":"GlyphRenderer"},{"attributes":{"plot":null,"text":"Bokeh Graph Demo"},"id":"825614bb-9b2e-440b-ac6d-0b56554ad26d","type":"Title"},{"attributes":{},"id":"b47c0ffa-7e18-4cc7-99c8-9fa623bf33bc","type":"HelpTool"},{"attributes":{"line_color":{"value":"#abdda4"},"line_width":{"value":4}},"id":"6aefbb7a-eda6-413f-9c81-3c9c1a6c1fb1","type":"MultiLine"},{"attributes":{"angle":{"field":"_angle","units":"rad"},"level":"glyph","plot":null,"source":{"id":"2f8434b7-8bb2-4f5d-8d0e-a29b022be6c4","type":"ColumnDataSource"},"text":{"field":"_id"},"text_align":"center","text_baseline":"middle","x":{"field":"_xpos"},"y":{"field":"_ypos"}},"id":"57740dce-3336-48d6-8681-65ff29fce1b1","type":"LabelSet"}],"root_ids":["95646f81-b405-4d6d-91a6-4293c4cbf950"]},"title":"Bokeh Application","version":"0.12.7"}};
+              var render_items = [{"docid":"64c80871-3b9b-4b18-aa21-6b699554b975","elementid":"026344e6-ae29-430a-8a14-b1fc982852f2","modelid":"95646f81-b405-4d6d-91a6-4293c4cbf950"}];
+              
+              Bokeh.embed.embed_items(docs_json, render_items);
+            });
+          };
+          if (document.readyState != "loading") fn();
+          else document.addEventListener("DOMContentLoaded", fn);
+        })();
+        
+        </script>
+    </body>
+</html>

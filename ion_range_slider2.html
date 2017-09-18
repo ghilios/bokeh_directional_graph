@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Bokeh Plot</title>
+        
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.css" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.4/css/ion.rangeSlider.css" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.4/css/ion.rangeSlider.skinFlat.min.css" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.4/img/sprite-skin-flat.png" type="text/css" />
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.7.min.css" type="text/css" />
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.7.min.css" type="text/css" />
+        
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.4/js/ion.rangeSlider.js"></script>
+<script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.7.min.js"></script>
+<script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.7.min.js"></script>
+<script type="text/javascript">
+    Bokeh.set_log_level("info");
+</script>
+        <style>
+          html {
+            width: 100%;
+            height: 100%;
+          }
+          body {
+            width: 90%;
+            height: 100%;
+            margin: auto;
+          }
+        </style>
+    </head>
+    <body>
+        
+        <div class="bk-root">
+            <div class="bk-plotdiv" id="6a054ca9-8f7b-4ff2-a332-32b48f6c9705"></div>
+        </div>
+        
+        <script type="text/javascript">
+            (function(root, factory) {
+        //  if(typeof exports === 'object' && typeof module === 'object')
+        //    factory(require("Bokeh"));
+        //  else if(typeof define === 'function' && define.amd)
+        //    define(["Bokeh"], factory);
+        //  else if(typeof exports === 'object')
+        //    factory(require("Bokeh"));
+        //  else
+            factory(root["Bokeh"]);
+        })(this, function(Bokeh) {
+          var define;
+          return (function outer(modules, entry) {
+          if (Bokeh != null) {
+            return Bokeh.register_plugin(modules, {}, entry);
+          } else {
+            throw new Error("Cannot find Bokeh. You have to load it prior to loading plugins.");
+          }
+        })
+        ({
+          "custom/main": function(require, module, exports) {
+            var models = {
+              "IonRangeSlider": require("custom/ion_range_slider").IonRangeSlider
+            };
+            require("base").register_models(models);
+            module.exports = models;
+          },
+          "custom/ion_range_slider": function(require, module, exports) {
+        "use strict";
+        Object.defineProperty(exports, "__esModule", { value: true });
+        var bind = function (fn, me) { return function () { return fn.apply(me, arguments); }; }, extend = function (child, parent) { for (var key in parent) {
+            if (hasProp.call(parent, key))
+                child[key] = parent[key];
+        } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; }, hasProp = {}.hasOwnProperty;
+        var callback_1 = require("core/util/callback");
+        var p = require("core/properties");
+        var dom_1 = require("core/dom");
+        var input_widget_1 = require("models/widgets/input_widget");
+        exports.IonRangeSliderView = (function (superClass) {
+            extend(IonRangeSliderView, superClass);
+            function IonRangeSliderView() {
+                this.slide = bind(this.slide, this);
+                this.slidestop = bind(this.slidestop, this);
+                return IonRangeSliderView.__super__.constructor.apply(this, arguments);
+            }
+            IonRangeSliderView.prototype._createElement = function () {
+                var el;
+                el = IonRangeSliderView.__super__._createElement.call(this);
+                this.$el = $(el);
+                return el;
+            };
+            IonRangeSliderView.prototype.template = function () {
+                var title, value;
+                if (this.model.title != null) {
+                    if (this.model.title.length !== 0) {
+                        title = dom_1.label({
+                            "for": this.model.id
+                        }, " " + this.model.title + ": ");
+                    }
+                    value = dom_1.input({
+                        type: "text",
+                        id: this.model.id,
+                        readonly: true
+                    });
+                }
+                return dom_1.div({
+                    "class": "bk-slider-parent"
+                }, title, value, dom_1.div({
+                    "class": "bk-slider-horizontal"
+                }, dom_1.input({
+                    type: "text",
+                    "class": "slider",
+                    id: this.model.id
+                })));
+            };
+            IonRangeSliderView.prototype.initialize = function (options) {
+                IonRangeSliderView.__super__.initialize.call(this, options);
+                this.connect(this.model.change, this.render);
+                dom_1.empty(this.el);
+                this.el.appendChild(this.template());
+                this.callbackWrapper = null;
+                if (this.model.callback_policy === 'continuous') {
+                    this.callbackWrapper = function () {
+                        var ref;
+                        return (ref = this.model.callback) != null ? ref.execute(this.model) : void 0;
+                    };
+                }
+                if (this.model.callback_policy === 'throttle' && this.model.callback) {
+                    this.callbackWrapper = callback_1.throttle(function () {
+                        var ref;
+                        return (ref = this.model.callback) != null ? ref.execute(this.model) : void 0;
+                    }, this.model.callback_throttle);
+                }
+                return this.render();
+            };
+            IonRangeSliderView.prototype.render = function () {
+                var disable, from, grid, max, min, opts, range, slider, step, to;
+                IonRangeSliderView.__super__.render.call(this);
+                max = this.model.end;
+                min = this.model.start;
+                grid = this.model.grid;
+                disable = this.model.disabled;
+                range = this.model.range || [max, min];
+                from = range[0], to = range[1];
+                step = this.model.step || ((max - min) / 50);
+                opts = {
+                    type: "double",
+                    grid: grid,
+                    min: min,
+                    max: max,
+                    from: from,
+                    to: to,
+                    step: step,
+                    disable: disable,
+                    onChange: this.slide,
+                    onFinish: this.slidestop
+                };
+                dom_1.input = this.$el.find('.slider')[0];
+                slider = jQuery(dom_1.input).ionRangeSlider(opts);
+                range = [from, to];
+                this.$el.find("#" + this.model.id).val(range.join(' - '));
+                this.$el.find('.bk-slider-parent').height(this.model.height);
+                return this;
+            };
+            IonRangeSliderView.prototype.slidestop = function (data) {
+                var ref;
+                if (this.model.callback_policy === 'mouseup' || this.model.callback_policy === 'throttle') {
+                    return (ref = this.model.callback) != null ? ref.execute(this.model) : void 0;
+                }
+            };
+            IonRangeSliderView.prototype.slide = function (data) {
+                var range, value;
+                range = [data.from, data.to];
+                value = range.join(' - ');
+                this.$el.find("#" + this.model.id).val(value);
+                this.model.range = range;
+                if (this.callbackWrapper) {
+                    return this.callbackWrapper();
+                }
+            };
+            return IonRangeSliderView;
+        })(input_widget_1.InputWidgetView);
+        exports.IonRangeSlider = (function (superClass) {
+            extend(IonRangeSlider, superClass);
+            function IonRangeSlider() {
+                return IonRangeSlider.__super__.constructor.apply(this, arguments);
+            }
+            IonRangeSlider.prototype.default_view = exports.IonRangeSliderView;
+            IonRangeSlider.prototype.type = "IonRangeSlider";
+            IonRangeSlider.define({
+                range: [p.Any],
+                start: [p.Number, 0],
+                end: [p.Number, 1],
+                step: [p.Number, 0.1],
+                grid: [p.Bool, true],
+                callback_throttle: [p.Number, 200],
+                callback_policy: [p.String, "throttle"]
+            });
+            return IonRangeSlider;
+        })(input_widget_1.InputWidget);
+        
+        }
+        }, "custom/main");
+        ;
+        });
+        (function() {
+          var fn = function() {
+            Bokeh.safely(function() {
+              var docs_json = {"446e8503-8ca8-4cf2-864f-f8b3138bcd2c":{"roots":{"references":[{"attributes":{"bottom_units":"screen","fill_alpha":{"value":0.5},"fill_color":{"value":"lightgrey"},"left_units":"screen","level":"overlay","line_alpha":{"value":1.0},"line_color":{"value":"black"},"line_dash":[4,4],"line_width":{"value":2},"plot":null,"render_mode":"css","right_units":"screen","top_units":"screen"},"id":"7328cb32-6587-445e-9f9b-ea1373704799","type":"BoxAnnotation"},{"attributes":{},"id":"e862b88e-b6a4-4e9b-84bb-d7debc4beea6","type":"LinearScale"},{"attributes":{"data_source":{"id":"83fe71b2-d9a9-4d6c-ac2d-8d8aa5c168f8","type":"ColumnDataSource"},"glyph":{"id":"6dbf71f5-46fb-4025-b743-edfd519905eb","type":"Line"},"hover_glyph":null,"muted_glyph":null,"nonselection_glyph":{"id":"925205fc-b103-4bfa-a8fe-b596f4ebe7aa","type":"Line"},"selection_glyph":null,"view":{"id":"90018105-eb0f-48ba-901c-f88a20afc559","type":"CDSView"}},"id":"1314b0db-b51e-48d2-8928-aca834aa64a5","type":"GlyphRenderer"},{"attributes":{"active_drag":"auto","active_inspect":"auto","active_scroll":"auto","active_tap":"auto","tools":[{"id":"ac949440-72a3-40b3-9539-f89204a21542","type":"PanTool"},{"id":"2ed3e117-9ddb-4a63-8ee2-9c605d3665b9","type":"WheelZoomTool"},{"id":"1dc66a7d-3213-48db-95bb-333857197b7c","type":"BoxZoomTool"},{"id":"7f559467-3602-4283-bf73-fdc76dfca433","type":"SaveTool"},{"id":"ae598a6c-3952-4627-b1ef-fdfd69aa1b16","type":"ResetTool"},{"id":"b4fa27e8-40bf-48cc-872c-63b62c544586","type":"HelpTool"}]},"id":"770c18a5-f0ec-458c-b122-aa668689fada","type":"Toolbar"},{"attributes":{"plot":{"id":"139d8be7-15c2-410e-ad84-75f4bb381aa0","subtype":"Figure","type":"Plot"},"ticker":{"id":"31961710-d8a1-42af-a9b2-dcb5fbcb5404","type":"BasicTicker"}},"id":"985a879d-600c-402e-9c27-3cca8a5c1b19","type":"Grid"},{"attributes":{},"id":"7f559467-3602-4283-bf73-fdc76dfca433","type":"SaveTool"},{"attributes":{"line_alpha":{"value":0.1},"line_color":{"value":"#1f77b4"},"line_width":{"value":3},"x":{"field":"x"},"y":{"field":"y"}},"id":"925205fc-b103-4bfa-a8fe-b596f4ebe7aa","type":"Line"},{"attributes":{},"id":"31961710-d8a1-42af-a9b2-dcb5fbcb5404","type":"BasicTicker"},{"attributes":{},"id":"6e07131c-d727-4ac6-9710-8b0eeddfd2a6","type":"BasicTickFormatter"},{"attributes":{},"id":"ace72b8e-8332-4acd-adfb-9a0b14d2e0b1","type":"BasicTickFormatter"},{"attributes":{"children":[{"id":"dfacb22e-d2d7-4173-a7f7-24efa6a1d669","type":"Slider"}]},"id":"f4015d67-d593-4b6f-b904-7779b5bbc3f4","type":"WidgetBox"},{"attributes":{"children":[{"id":"139d8be7-15c2-410e-ad84-75f4bb381aa0","subtype":"Figure","type":"Plot"},{"id":"f4015d67-d593-4b6f-b904-7779b5bbc3f4","type":"WidgetBox"},{"id":"873a175a-62ef-4729-ab1a-55f75a719d16","type":"WidgetBox"}]},"id":"0135cc9c-778c-4fdd-9515-85cdcfcdda05","type":"Column"},{"attributes":{"formatter":{"id":"ace72b8e-8332-4acd-adfb-9a0b14d2e0b1","type":"BasicTickFormatter"},"plot":{"id":"139d8be7-15c2-410e-ad84-75f4bb381aa0","subtype":"Figure","type":"Plot"},"ticker":{"id":"31961710-d8a1-42af-a9b2-dcb5fbcb5404","type":"BasicTicker"}},"id":"d0677bed-b272-4f8b-a7fb-45431553be67","type":"LinearAxis"},{"attributes":{"source":{"id":"83fe71b2-d9a9-4d6c-ac2d-8d8aa5c168f8","type":"ColumnDataSource"}},"id":"90018105-eb0f-48ba-901c-f88a20afc559","type":"CDSView"},{"attributes":{},"id":"ac949440-72a3-40b3-9539-f89204a21542","type":"PanTool"},{"attributes":{"plot":null,"text":""},"id":"26546ae1-5971-4d8c-8df7-e3f2b596695a","type":"Title"},{"attributes":{"dimension":1,"plot":{"id":"139d8be7-15c2-410e-ad84-75f4bb381aa0","subtype":"Figure","type":"Plot"},"ticker":{"id":"784ce22f-a249-4490-a5e3-c763388489dc","type":"BasicTicker"}},"id":"d175cdc8-4734-49c4-a387-56d8abebeb4e","type":"Grid"},{"attributes":{"args":{"source":{"id":"83fe71b2-d9a9-4d6c-ac2d-8d8aa5c168f8","type":"ColumnDataSource"}},"code":"\n        var data = source.data;\n        var f = cb_obj.range\n        x = data['x']\n        y = data['y']\n        pow = (Math.log(y[100])/Math.log(x[100]))\n        console.log(pow)\n        delta = (f[1]-f[0])/x.length\n        for (i = 0; i < x.length; i++) {\n            x[i] = delta*i + f[0]\n            y[i] = Math.pow(x[i], pow)\n        }\n        source.change.emit();\n    "},"id":"6b6cbea6-6959-46a0-98ec-fcb1b3d10a4d","type":"CustomJS"},{"attributes":{},"id":"6fe63190-d7e6-4df1-afc7-09c91f9868ad","type":"LinearScale"},{"attributes":{"callback":null,"column_names":["x","y"],"data":{"x":[0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05,0.055,0.06,0.065,0.07,0.075,0.08,0.085,0.09,0.095,0.1,0.105,0.11,0.115,0.12,0.125,0.13,0.135,0.14,0.145,0.15,0.155,0.16,0.165,0.17,0.17500000000000002,0.18,0.185,0.19,0.195,0.2,0.20500000000000002,0.21,0.215,0.22,0.225,0.23,0.23500000000000001,0.24,0.245,0.25,0.255,0.26,0.265,0.27,0.275,0.28,0.28500000000000003,0.29,0.295,0.3,0.305,0.31,0.315,0.32,0.325,0.33,0.335,0.34,0.34500000000000003,0.35000000000000003,0.355,0.36,0.365,0.37,0.375,0.38,0.385,0.39,0.395,0.4,0.405,0.41000000000000003,0.41500000000000004,0.42,0.425,0.43,0.435,0.44,0.445,0.45,0.455,0.46,0.465,0.47000000000000003,0.47500000000000003,0.48,0.485,0.49,0.495,0.5,0.505,0.51,0.515,0.52,0.525,0.53,0.535,0.54,0.545,0.55,0.555,0.56,0.5650000000000001,0.5700000000000001,0.5750000000000001,0.58,0.585,0.59,0.595,0.6,0.605,0.61,0.615,0.62,0.625,0.63,0.635,0.64,0.645,0.65,0.655,0.66,0.665,0.67,0.675,0.68,0.685,0.6900000000000001,0.6950000000000001,0.7000000000000001,0.705,0.71,0.715,0.72,0.725,0.73,0.735,0.74,0.745,0.75,0.755,0.76,0.765,0.77,0.775,0.78,0.785,0.79,0.795,0.8,0.805,0.81,0.8150000000000001,0.8200000000000001,0.8250000000000001,0.8300000000000001,0.835,0.84,0.845,0.85,0.855,0.86,0.865,0.87,0.875,0.88,0.885,0.89,0.895,0.9,0.905,0.91,0.915,0.92,0.925,0.93,0.935,0.9400000000000001,0.9450000000000001,0.9500000000000001,0.9550000000000001,0.96,0.965,0.97,0.975,0.98,0.985],"y":[0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05,0.055,0.06,0.065,0.07,0.075,0.08,0.085,0.09,0.095,0.1,0.105,0.11,0.115,0.12,0.125,0.13,0.135,0.14,0.145,0.15,0.155,0.16,0.165,0.17,0.17500000000000002,0.18,0.185,0.19,0.195,0.2,0.20500000000000002,0.21,0.215,0.22,0.225,0.23,0.23500000000000001,0.24,0.245,0.25,0.255,0.26,0.265,0.27,0.275,0.28,0.28500000000000003,0.29,0.295,0.3,0.305,0.31,0.315,0.32,0.325,0.33,0.335,0.34,0.34500000000000003,0.35000000000000003,0.355,0.36,0.365,0.37,0.375,0.38,0.385,0.39,0.395,0.4,0.405,0.41000000000000003,0.41500000000000004,0.42,0.425,0.43,0.435,0.44,0.445,0.45,0.455,0.46,0.465,0.47000000000000003,0.47500000000000003,0.48,0.485,0.49,0.495,0.5,0.505,0.51,0.515,0.52,0.525,0.53,0.535,0.54,0.545,0.55,0.555,0.56,0.5650000000000001,0.5700000000000001,0.5750000000000001,0.58,0.585,0.59,0.595,0.6,0.605,0.61,0.615,0.62,0.625,0.63,0.635,0.64,0.645,0.65,0.655,0.66,0.665,0.67,0.675,0.68,0.685,0.6900000000000001,0.6950000000000001,0.7000000000000001,0.705,0.71,0.715,0.72,0.725,0.73,0.735,0.74,0.745,0.75,0.755,0.76,0.765,0.77,0.775,0.78,0.785,0.79,0.795,0.8,0.805,0.81,0.8150000000000001,0.8200000000000001,0.8250000000000001,0.8300000000000001,0.835,0.84,0.845,0.85,0.855,0.86,0.865,0.87,0.875,0.88,0.885,0.89,0.895,0.9,0.905,0.91,0.915,0.92,0.925,0.93,0.935,0.9400000000000001,0.9450000000000001,0.9500000000000001,0.9550000000000001,0.96,0.965,0.97,0.975,0.98,0.985]}},"id":"83fe71b2-d9a9-4d6c-ac2d-8d8aa5c168f8","type":"ColumnDataSource"},{"attributes":{},"id":"784ce22f-a249-4490-a5e3-c763388489dc","type":"BasicTicker"},{"attributes":{"overlay":{"id":"7328cb32-6587-445e-9f9b-ea1373704799","type":"BoxAnnotation"}},"id":"1dc66a7d-3213-48db-95bb-333857197b7c","type":"BoxZoomTool"},{"attributes":{},"id":"b4fa27e8-40bf-48cc-872c-63b62c544586","type":"HelpTool"},{"attributes":{"children":[{"id":"61d2cbad-e0e5-4792-b59f-493a048822c6","type":"IonRangeSlider"}]},"id":"873a175a-62ef-4729-ab1a-55f75a719d16","type":"WidgetBox"},{"attributes":{"callback":null},"id":"98381218-db58-493e-90a3-d4b7b2fe1e1f","type":"DataRange1d"},{"attributes":{"callback":{"id":"6b6cbea6-6959-46a0-98ec-fcb1b3d10a4d","type":"CustomJS"},"callback_policy":"continuous","end":0.99,"range":[0.01,0.985],"start":0.01,"step":0.01,"title":"Ion Range Slider - Range"},"id":"61d2cbad-e0e5-4792-b59f-493a048822c6","type":"IonRangeSlider"},{"attributes":{"line_alpha":{"value":0.6},"line_color":{"value":"#ed5565"},"line_width":{"value":3},"x":{"field":"x"},"y":{"field":"y"}},"id":"6dbf71f5-46fb-4025-b743-edfd519905eb","type":"Line"},{"attributes":{"formatter":{"id":"6e07131c-d727-4ac6-9710-8b0eeddfd2a6","type":"BasicTickFormatter"},"plot":{"id":"139d8be7-15c2-410e-ad84-75f4bb381aa0","subtype":"Figure","type":"Plot"},"ticker":{"id":"784ce22f-a249-4490-a5e3-c763388489dc","type":"BasicTicker"}},"id":"46bc4fd4-8306-48ab-948a-b2e3dca4e570","type":"LinearAxis"},{"attributes":{"args":{"source":{"id":"83fe71b2-d9a9-4d6c-ac2d-8d8aa5c168f8","type":"ColumnDataSource"}},"code":"\n        var data = source.data;\n        var f = cb_obj.value\n        x = data['x']\n        y = data['y']\n        for (i = 0; i < x.length; i++) {\n            y[i] = Math.pow(x[i], f)\n        }\n        source.change.emit();\n    "},"id":"61228989-cab4-408d-a5e3-1af2fae79005","type":"CustomJS"},{"attributes":{"callback":{"id":"61228989-cab4-408d-a5e3-1af2fae79005","type":"CustomJS"},"end":5,"start":0,"step":0.1,"title":"Bokeh Slider - Power","value":1},"id":"dfacb22e-d2d7-4173-a7f7-24efa6a1d669","type":"Slider"},{"attributes":{},"id":"ae598a6c-3952-4627-b1ef-fdfd69aa1b16","type":"ResetTool"},{"attributes":{"callback":null},"id":"942fcb0d-2833-4ca6-95b5-e1992b559c77","type":"DataRange1d"},{"attributes":{"below":[{"id":"d0677bed-b272-4f8b-a7fb-45431553be67","type":"LinearAxis"}],"left":[{"id":"46bc4fd4-8306-48ab-948a-b2e3dca4e570","type":"LinearAxis"}],"plot_height":400,"plot_width":400,"renderers":[{"id":"d0677bed-b272-4f8b-a7fb-45431553be67","type":"LinearAxis"},{"id":"985a879d-600c-402e-9c27-3cca8a5c1b19","type":"Grid"},{"id":"46bc4fd4-8306-48ab-948a-b2e3dca4e570","type":"LinearAxis"},{"id":"d175cdc8-4734-49c4-a387-56d8abebeb4e","type":"Grid"},{"id":"7328cb32-6587-445e-9f9b-ea1373704799","type":"BoxAnnotation"},{"id":"1314b0db-b51e-48d2-8928-aca834aa64a5","type":"GlyphRenderer"}],"title":{"id":"26546ae1-5971-4d8c-8df7-e3f2b596695a","type":"Title"},"toolbar":{"id":"770c18a5-f0ec-458c-b122-aa668689fada","type":"Toolbar"},"x_range":{"id":"98381218-db58-493e-90a3-d4b7b2fe1e1f","type":"DataRange1d"},"x_scale":{"id":"e862b88e-b6a4-4e9b-84bb-d7debc4beea6","type":"LinearScale"},"y_range":{"id":"942fcb0d-2833-4ca6-95b5-e1992b559c77","type":"DataRange1d"},"y_scale":{"id":"6fe63190-d7e6-4df1-afc7-09c91f9868ad","type":"LinearScale"}},"id":"139d8be7-15c2-410e-ad84-75f4bb381aa0","subtype":"Figure","type":"Plot"},{"attributes":{},"id":"2ed3e117-9ddb-4a63-8ee2-9c605d3665b9","type":"WheelZoomTool"}],"root_ids":["0135cc9c-778c-4fdd-9515-85cdcfcdda05"]},"title":"Bokeh Application","version":"0.12.7"}};
+              var render_items = [{"docid":"446e8503-8ca8-4cf2-864f-f8b3138bcd2c","elementid":"6a054ca9-8f7b-4ff2-a332-32b48f6c9705","modelid":"0135cc9c-778c-4fdd-9515-85cdcfcdda05"}];
+              
+              Bokeh.embed.embed_items(docs_json, render_items);
+            });
+          };
+          if (document.readyState != "loading") fn();
+          else document.addEventListener("DOMContentLoaded", fn);
+        })();
+        
+        </script>
+    </body>
+</html>
