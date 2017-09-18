@@ -1,13 +1,15 @@
 import {HoverTool, HoverToolView} from "models/tools/inspectors/hover_tool"
 import * as p from "core/properties"
 import {isString, isFunction} from "core/util/types"
+import {div, span} from "core/dom"
+import {replace_placeholders} from "core/util/templating"
 
 export class DynamicHoverToolView extends HoverToolView
   _render_tooltips: (ds, i, vars) ->
     dynamic_tooltips = @model.dynamic_tooltips
     if not dynamic_tooltips?
       return super(ds, i, vars)
-    tooltips = if isFunction(dynamic_tooltips) then dynamic_tooltips(ds, i, vars) else dynamic_tooltips.execute(ds, i, vars)
+    tooltips = dynamic_tooltips.execute(@model, {ds: ds, i: i, vars: vars})
     if isString(tooltips)
       el = div()
       el.innerHTML = replace_placeholders(tooltips, ds, i, @model.formatters, vars)

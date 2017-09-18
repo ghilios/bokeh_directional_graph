@@ -13,6 +13,13 @@ G = nx.karate_club_graph()
 bb = nx.edge_betweenness_centrality(G, normalized=False)
 nx.set_edge_attributes(G, 'betweenness', bb)
 
+# hack in edge and node types for the demo
+for _, v in G.node.items():
+    v['_type'] = 'KarateClubRole'
+for _, e_s in G.edge.items():
+    for _, e_e in e_s.items():
+        e_e['_type'] = 'isFriendsWith'
+
 plot = figure(title="Bokeh Graph Demo", x_range=(-1.1, 1.1), y_range=(-1.1, 1.1),
               tools="pan,wheel_zoom,box_zoom,save,reset,help", toolbar_location="right",
               plot_width=800, plot_height=800)
@@ -25,9 +32,10 @@ graph_layout_map = graph.layout_provider.graph_layout
 node_positions = [graph_layout_map[k] for k, v in G.node.items()]
 
 graph.node_renderer.data_source.data['_id'] = [k for k, _ in G.node.items()]
-graph.node_renderer.data_source.data['_club'] = [v['club'] for _, v in G.node.items()]
+graph.node_renderer.data_source.data['props'] = [v for _, v in G.node.items()]
 graph.node_renderer.data_source.data['_xpos'] = [np[0] for np in node_positions]
 graph.node_renderer.data_source.data['_ypos'] = [np[1] for np in node_positions]
+graph.node_renderer.data_source.tags.append('nodes')
 
 edge_data_source = graph.edge_renderer.data_source
 edge_positions = [(graph_layout_map[s_i], graph_layout_map[e_i]) for s_i, e_i in
@@ -45,14 +53,16 @@ def clamp_angle(angle):
 
 radian_angles = [math.atan2(y2 - y1, x2 - x1) for ((x1, y1), (x2, y2)) in edge_positions]
 
-betweenness = [round(G.edge[s_i][e_i]['betweenness'], 2) for s_i, e_i in
-               zip(edge_data_source.data['start'], edge_data_source.data['end'])]
+# Hack in edge props for demo
+edge_props = [{'_type': 'isFriendsWith', 'betweenness': round(G.edge[s_i][e_i]['betweenness'], 2)} for s_i, e_i in
+              zip(edge_data_source.data['start'], edge_data_source.data['end'])]
 
 graph.edge_renderer.data_source.data['_id'] = ["--friends_with-->"] * len(edge_data_source.data['start'])
-graph.edge_renderer.data_source.data['_betweenness'] = betweenness
+graph.edge_renderer.data_source.data['props'] = edge_props
 graph.edge_renderer.data_source.data['_xpos'] = edge_x_midpoints
 graph.edge_renderer.data_source.data['_ypos'] = edge_y_midpoints
 graph.edge_renderer.data_source.data['_angle'] = radian_angles
+graph.edge_renderer.data_source.tags.append('edges')
 
 node_labels = LabelSet(x='_xpos', y='_ypos', text='_id', level='glyph',
                        x_offset=0, y_offset=0, source=graph.node_renderer.data_source, render_mode='canvas',
@@ -81,10 +91,29 @@ def dynamic_hover_tooltips(ds, i, vars, Window=None):
     ]
 
 
+jscode = """
+i = cb_data.i
+props = cb_data.ds.data.props[i]
+console.log(props, cb_obj, cb_data);
+tooltips = []
+if (cb_data.ds.tags.indexOf('nodes') !== -1) {
+    tooltips.push(["graph_obj_type", "Node"])
+} else {
+    tooltips.push(["graph_obj_type", "Edge"])
+}
+Object.keys(props).forEach(function(key) {
+    value = props[key];
+    console.log(key, value.toString())
+    tooltips.push([key, value.toString()])
+});
+return tooltips
+"""
+
 plot.add_tools(DynamicHoverTool(tooltips=[
     ("index", "$index"),
     ("club", "@_club")
 ],
-    dynamic_tooltips=CustomJS.from_py_func(dynamic_hover_tooltips)))
+    #    dynamic_tooltips=CustomJS.from_py_func(dynamic_hover_tooltips)))
+    dynamic_tooltips=CustomJS(code=jscode)))
 
 show(plot)
